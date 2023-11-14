@@ -28,7 +28,8 @@ function Form() {
   const [isLoadingGeocofing, setIsLoadingGeocofing] = useState(false)
   const [emoji, setEmoji] = useState("")
   const [geocodingError, setGeocodingError] = useState("");
-  const { createCity } = useCities()
+  const { createCity, isLoading } = useCities()
+  const navigate = useNavigate()
   useEffect(function () {
     if (!lat && !lng) return;
     async function fetchCityData() {
@@ -52,7 +53,7 @@ function Form() {
     fetchCityData()
   }, [lat, lng])
 
-  function handleOnSubmit(e) {
+  async function handleOnSubmit(e) {
     e.preventDefault();
     if (!cityName || !date) return;
 
@@ -67,13 +68,14 @@ function Form() {
         lng
       }
     }
-    createCity(newCity);
+    await createCity(newCity);
+    navigate("/app");
   }
   if (!lng && !lat) return <Message message="Click somewhere on the map" />;
   if (isLoadingGeocofing) return <Spinner />
   if (geocodingError) return <Message message={geocodingError} />
   return (
-    <form className={styles.form} onSubmit={handleOnSubmit}>
+    <form className={`${styles.form} ${isLoading ? styles.loading : ""}`} onSubmit={handleOnSubmit}>
       <div className={styles.row}>
         <label htmlFor="cityName">City name</label>
         <input
