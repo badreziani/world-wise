@@ -7,6 +7,9 @@ import Button from "./Button";
 import BackButton from "./BackButton";
 import Message from './Message';
 import Spinner from "./Spinner";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useCities } from "../contexts/CitiesContext";
 
 export function convertToEmoji(countryCode) {
   const codePoints = countryCode
@@ -24,7 +27,8 @@ function Form() {
   const [notes, setNotes] = useState("");
   const [isLoadingGeocofing, setIsLoadingGeocofing] = useState(false)
   const [emoji, setEmoji] = useState("")
-  const [geocodingError, setGeocodingError] = useState("")
+  const [geocodingError, setGeocodingError] = useState("");
+  const { createCity } = useCities()
   useEffect(function () {
     if (!lat && !lng) return;
     async function fetchCityData() {
@@ -47,11 +51,29 @@ function Form() {
     }
     fetchCityData()
   }, [lat, lng])
+
+  function handleOnSubmit(e) {
+    e.preventDefault();
+    if (!cityName || !date) return;
+
+    const newCity = {
+      cityName,
+      country,
+      emoji,
+      date,
+      notes,
+      position: {
+        lat,
+        lng
+      }
+    }
+    createCity(newCity);
+  }
   if (!lng && !lat) return <Message message="Click somewhere on the map" />;
   if (isLoadingGeocofing) return <Spinner />
   if (geocodingError) return <Message message={geocodingError} />
   return (
-    <form className={styles.form}>
+    <form className={styles.form} onSubmit={handleOnSubmit}>
       <div className={styles.row}>
         <label htmlFor="cityName">City name</label>
         <input
@@ -64,10 +86,16 @@ function Form() {
 
       <div className={styles.row}>
         <label htmlFor="date">When did you go to {cityName}?</label>
-        <input
+        {/* <input
           id="date"
           onChange={(e) => setDate(e.target.value)}
           value={date}
+        /> */}
+        <DatePicker
+          id="date"
+          onChange={(date) => setDate(date)}
+          selected={date}
+          dateFormat="dd/MM/yyyy"
         />
       </div>
 
