@@ -1,17 +1,39 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useReducer } from "react"
 
 const BASE_URL = "http://localhost:8080"
 const CitiesContext = createContext()
+const initialState = {
+    cities: [],
+    isLoading: false,
+    currentCity: {}
+}
+
+function reducer(state, action) {
+    switch (action.type) {
+        case "loading":
+            return { ...state, isLoading: true };
+        case "cities/loaded":
+            return { ...state, cities: action.payload, isLoading: false }
+        case "city/loaded":
+            return { ...state, currentCity: action.payload, isLoading: false }
+        case "city/created":
+            return { ...state, cities: action.payload, isLoading: false }
+        case "city/deleted":
+            return { ...state, }
+
+    }
+}
 
 function CitiesProvider({ children }) {
-    const [cities, setCities] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [currentCity, setCurrentCity] = useState({})
+    const [{ cities, isLoading, currentCity }, dispatch] = useReducer(reducer, initialState);
+    // const [cities, setCities] = useState([]);
+    // const [isLoading, setIsLoading] = useState(false);
+    // const [currentCity, setCurrentCity] = useState({})
 
     useEffect(function () {
         async function loadCities() {
             try {
-                setIsLoading(true)
+                dispatch({})
                 const res = await fetch(`${BASE_URL}/cities`)
                 const data = await res.json()
                 setCities(data);
